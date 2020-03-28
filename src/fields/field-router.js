@@ -18,10 +18,5 @@ fieldRouter
         .catch(next)
     })
 
-// fieldRouter
-//     .route('/')
-//     .get((req, res, next) => {
-//         FieldService.getGeneralHealth
-//     })
 
 module.exports = fieldRouter
