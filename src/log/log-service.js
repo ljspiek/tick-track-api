@@ -1,23 +1,70 @@
 const Treeize = require('treeize')
 
 const LogService = {
-    getAllFields(db) {
+    getAllLoggedSymptoms(db) {
         return db
-            .from('ticktrack_generalhealth as generalhealth')
+            .from('ticktrack_logs as logs')
             .select(
-                'generalhealth.id',
-                'generalhealth.rating'
+                'logs.id as log_id',
+                'symptoms.id as symptom_id',
+                'symptoms.symptom',
+                'severity.severity'
+            )
+            .leftJoin(
+                'ticktrack_symptomsdetail as sympdt',
+                'sympdt.symptomlog_id',
+                'logs.id'
+            )
+            .leftJoin(
+                'ticktrack_symptoms as symptoms',
+                'symptoms.id',
+                'sympdt.symptoms_id'
+            )
+            .leftJoin(
+                'ticktrack_severity as severity',
+                'severity.id',
+                'sympdt.severity_id'
             )
     },
 
-    serializeFields(fields) {
-        
+    getAllLoggedHealthRatings(db) {
+        return db
+            .from('ticktrack_logs as logs')
+            .select(
+                'logs.id as log_id',
+                'generalhealth.id',
+                'generalhealth.rating as rating'
+            )
+            .leftJoin(
+                'ticktrack_generalhealth as generalhealth',
+                'generalhealth.id',
+                'logs.general_health_id'
+            )
+            
+    },
 
-        return {
-            id: fields.id,
-            rating: field.rating
-        }
-    }
+    getAllNewInfections(db) {
+        return db
+            .from('ticktrack_infectionindicatorslog as infectionlog')
+            .select(
+                'logs.id as log_id',
+                'newinfections.id',
+                'newinfections.indicator'
+            )
+            .leftJoin(
+                'ticktrack_logs as logs',
+                'logs.id',
+                'infectionlog.symptomlog_id'
+            )
+            .leftOuterJoin(
+                'ticktrack_newinfections as newinfections',
+                'newinfections.id',
+                'infectionlog.newinfectionindicators_id'
+            )
+    },
+    
+
+    
 }
 
 

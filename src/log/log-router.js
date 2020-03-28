@@ -7,7 +7,7 @@ const logRouter = express.Router()
 logRouter
     .route('/')
     .get((req, res, next) => {
-        LogService.getAllFields(req.app.get('db'))
+        LogService.getAllNewInfections(req.app.get('db'))
             .then(fields => {
                 console.log(fields)
                 res.json(fields)

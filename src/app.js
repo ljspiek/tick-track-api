@@ -33,11 +33,11 @@ if (NODE_ENV !== 'production') {
 
 app.use(morgan(morganOption))
 app.use(helmet())
-app.use(
-    cors({
-        origin: CLIENT_ORIGIN
-    }))
-
+// app.use(
+//     cors({
+//         origin: 'localhost:3000'
+//     }))
+app.use(cors())
 app.use('/api/auth', authRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/log', logRouter)
