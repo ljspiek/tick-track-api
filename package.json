@@ -27,7 +27,9 @@
     "knex": "^0.20.13",
     "morgan": "^1.9.1",
     "pg": "^7.18.2",
-    "winston": "^3.2.1"
+    "treeize": "^2.1.2",
+    "winston": "^3.2.1",
+    "xss": "^1.0.6"
   },
   "devDependencies": {
     "chai": "^4.2.0",

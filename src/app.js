@@ -5,6 +5,10 @@ const cors = require('cors')
 const {CLIENT_ORIGIN} = require('./config')
 const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
+const authRouter = require('./auth/auth-router')
+const usersRouter = require('./users/users-router')
+const logRouter = require('./log/log-router')
+const fieldRouter = require('./fields/field-router')
 const winston = require('winston')
 
 const app = express()
@@ -34,6 +38,10 @@ app.use(
         origin: CLIENT_ORIGIN
     }))
 
+app.use('/api/auth', authRouter)
+app.use('/api/users', usersRouter)
+app.use('/api/log', logRouter)
+app.use('/api/fields', fieldRouter)
 
 app.use(function validateBearerToken(req, res, next) {
     const apiToken = process.env.API_TOKEN
