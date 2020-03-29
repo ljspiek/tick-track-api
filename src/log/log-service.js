@@ -63,7 +63,31 @@ const LogService = {
             )
     },
     
+    getSymptpomLogById(db, id) {
+        return LogService.getAllLoggedSymptoms(db)
+            .where('logs.id', id)
+            
+    },
 
+    getHealthLogById(db, id) {
+        return LogService.getAllLoggedHealthRatings(db)
+            .where('logs.id', id)
+    },
+
+    getInfectionLogById(db, id) {
+        return LogService.getAllNewInfections(db)
+            .where('logs.id', id)
+    },
+
+    serializeLog(log) {
+        return {
+            log_id: log.log_id,
+            symptom_id: log.symptom_id,
+            symptom: log.symptom,
+            severity: log.severity
+        }
+    }
+    
     
 }
 
