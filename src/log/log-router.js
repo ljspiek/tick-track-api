@@ -48,7 +48,10 @@ async function checkLogExists(req, res, next) {
         error: `Log doesn't exist`
       })
 
-    res.log = [health, infections, symptoms]
+    res.log = {
+        generalhealth: health, 
+        newinfectionindicators: infections,
+        symptoms: symptoms}
     next()
   } catch (error) {
     next(error)
