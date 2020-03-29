@@ -1,6 +1,20 @@
 const Treeize = require('treeize')
 
 const LogService = {
+    getLogHeader(db) {
+        return db
+            .from('ticktrack_logs as logs')
+            .select(
+                'logs.id',
+                'logs.date_created as date'
+            )
+            .leftJoin(
+                'ticktrack_users as users',
+                'users.id', 
+                'logs.user_id'
+            )
+    },
+
     getAllLoggedSymptoms(db) {
         return db
             .from('ticktrack_logs as logs')
@@ -25,6 +39,12 @@ const LogService = {
                 'severity.id',
                 'sympdt.severity_id'
             )
+            .leftJoin(
+                'ticktrack_users as users',
+                'users.id', 
+                'logs.user_id'
+            )
+            
     },
 
     getAllLoggedHealthRatings(db) {
@@ -39,6 +59,11 @@ const LogService = {
                 'ticktrack_generalhealth as generalhealth',
                 'generalhealth.id',
                 'logs.general_health_id'
+            )
+            .leftJoin(
+                'ticktrack_users as users',
+                'users.id', 
+                'logs.user_id'
             )
             
     },
@@ -61,6 +86,11 @@ const LogService = {
                 'newinfections.id',
                 'infectionlog.newinfectionindicators_id'
             )
+            .leftJoin(
+                'ticktrack_users as users',
+                'users.id', 
+                'logs.user_id'
+            )
     },
     
     getSymptpomLogById(db, id) {
@@ -77,6 +107,22 @@ const LogService = {
     getInfectionLogById(db, id) {
         return LogService.getAllNewInfections(db)
             .where('logs.id', id)
+    },
+
+    getSymptpomLogByUser(db, id) {
+        return LogService.getAllLoggedSymptoms(db)
+            .where('users.id', id)
+            
+    },
+
+    getHealthLogByUser(db, id) {
+        return LogService.getAllLoggedHealthRatings(db)
+            .where('users.id', id)
+    },
+
+    getInfectionLogByUser(db, id) {
+        return LogService.getAllNewInfections(db)
+            .where('users.id', id)
     },
 
     serializeLog(log) {

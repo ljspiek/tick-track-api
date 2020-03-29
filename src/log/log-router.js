@@ -24,6 +24,14 @@ logRouter
         res.json(res.log)
     })
 
+logRouter
+    .route('/user/:user_id')
+    .all(checkUserLogExists)
+    .get((req, res) => {
+        res.json(res.log)
+    })
+
+
 
 async function checkLogExists(req, res, next) {
   try {
@@ -57,4 +65,37 @@ async function checkLogExists(req, res, next) {
     next(error)
   }
 }
+
+async function checkUserLogExists(req, res, next) {
+    try {
+      const symptoms = await LogService.getSymptpomLogByUser(
+        req.app.get('db'),
+        req.params.user_id
+      )
+  
+      const health = await LogService.getHealthLogByUser(
+          req.app.get('db'),
+          req.params.user_id
+      )
+  
+      const infections = await LogService.getInfectionLogByUser(
+          req.app.get('db'),
+          req.params.user_id
+      )
+  
+  
+      if (!symptoms || !health || !infections)
+        return res.status(404).json({
+          error: `Log doesn't exist`
+        })
+  
+      res.log = {
+          generalhealth: health, 
+          newinfectionindicators: infections,
+          symptoms: symptoms}
+      next()
+    } catch (error) {
+      next(error)
+    }
+  }
 module.exports = logRouter
