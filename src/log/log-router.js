@@ -2,6 +2,7 @@ const express = require('express')
 const LogService = require('./log-service')
 const LogNestedService = require('./lognested-service')
 const { requireAuth } = require('../middleware/jwt-auth')
+const bodyParser = express.json()
 
 const logRouter = express.Router()
 
@@ -14,16 +15,12 @@ logRouter
             LogService.getCountNewInfections(req.app.get('db'))
         ])
         .then(([header, generalhealth, newinfectionindicators]) => {
-            // console.log("TEST", symptoms, generalhealth, newinfectionindicators)
-            // console.log("TREE", res.json(LogService.treeizeLog(header)))
-            // const results = symptoms.map(symptom => {
-            //     log_id = symptom.log_id
-            // })
-            // console.log("TEST", results)
-            // res.json({header, symptoms, generalhealth, newinfectionindicators})
             res.json(LogService.treeizeLog(header, generalhealth, newinfectionindicators))
         })
         .catch(next)
+    })
+    .post(bodyParser, (req, res, next) => {
+        
     })
 
 logRouter
@@ -58,13 +55,19 @@ async function checkLogExists(req, res, next) {
         req.params.log_id
     )
 
+    const header = await LogService.getHeaderDatabyId(
+      req.app.get('db'),
+      req.params.log_id
+    )
 
-    if (!symptoms || !health || !infections)
+
+    if (!symptoms || !health || !infections || !header) 
       return res.status(404).json({
         error: `Log doesn't exist`
       })
 
     res.log = {
+        header: header,
         generalhealth: health, 
         newinfectionindicators: infections,
         symptoms: symptoms}

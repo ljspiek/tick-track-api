@@ -104,7 +104,12 @@ const LogService = {
             )
             .groupBy('log_id')
             
-            // .count('infectionlog.newinfectionindicators_id')
+            
+    },
+
+    getHeaderDatabyId(db, id) {
+        return LogService.getLogHeader(db)
+            .where('logs.id', id)
     },
     
     getSymptpomLogById(db, id) {
@@ -141,7 +146,6 @@ const LogService = {
 
     treeizeLog(header, generalhealth, newinfectionindicators) {
             const log = header.concat(generalhealth, newinfectionindicators)
-            console.log("LOG:",log)
             const logTree = new Treeize()
             
             const seed = log.map(logs => ({
