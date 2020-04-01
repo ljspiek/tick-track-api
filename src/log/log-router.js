@@ -1,5 +1,6 @@
 const express = require('express')
 const LogService = require('./log-service')
+const LogNestedService = require('./lognested-service')
 const { requireAuth } = require('../middleware/jwt-auth')
 
 const logRouter = express.Router()
@@ -8,13 +9,21 @@ logRouter
     .route('/')
     .get((req, res, next) => {
         Promise.all([
-            LogService.getAllLoggedSymptoms(req.app.get('db')),
+            LogService.getLogHeader(req.app.get('db')),
             LogService.getAllLoggedHealthRatings(req.app.get('db')),
-            LogService.getAllNewInfections(req.app.get('db'))
+            LogService.getCountNewInfections(req.app.get('db'))
         ])
-        .then(([symptoms, generalhealth, newinfectionindicators]) => {
-            res.json({symptoms, generalhealth, newinfectionindicators})
+        .then(([header, generalhealth, newinfectionindicators]) => {
+            // console.log("TEST", symptoms, generalhealth, newinfectionindicators)
+            // console.log("TREE", res.json(LogService.treeizeLog(header)))
+            // const results = symptoms.map(symptom => {
+            //     log_id = symptom.log_id
+            // })
+            // console.log("TEST", results)
+            // res.json({header, symptoms, generalhealth, newinfectionindicators})
+            res.json(LogService.treeizeLog(header, generalhealth, newinfectionindicators))
         })
+        .catch(next)
     })
 
 logRouter
@@ -30,7 +39,6 @@ logRouter
     .get((req, res) => {
         res.json(res.log)
     })
-
 
 
 async function checkLogExists(req, res, next) {

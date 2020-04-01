@@ -1,11 +1,12 @@
 const Treeize = require('treeize')
 
+
 const LogService = {
-    getLogHeader(db) {
+     getLogHeader(db) {
         return db
             .from('ticktrack_logs as logs')
             .select(
-                'logs.id',
+                'logs.id as log_id',
                 'logs.date_created as date'
             )
             .leftJoin(
@@ -73,7 +74,7 @@ const LogService = {
             .from('ticktrack_infectionindicatorslog as infectionlog')
             .select(
                 'logs.id as log_id',
-                'newinfections.id',
+                'newinfections.id as infection_id',
                 'newinfections.indicator'
             )
             .leftJoin(
@@ -91,6 +92,19 @@ const LogService = {
                 'users.id', 
                 'logs.user_id'
             )
+    },
+
+    getCountNewInfections(db) {
+        return db 
+            .from('ticktrack_infectionindicatorslog as infectionlog')
+            .select('infectionlog.symptomlog_id as log_id',
+            db.raw(
+                `count(DISTINCT infectionlog.newinfectionindicators_id) AS newinfections`
+                )
+            )
+            .groupBy('log_id')
+            
+            // .count('infectionlog.newinfectionindicators_id')
     },
     
     getSymptpomLogById(db, id) {
@@ -125,17 +139,31 @@ const LogService = {
             .where('users.id', id)
     },
 
-    serializeLog(log) {
-        return {
-            log_id: log.log_id,
-            symptom_id: log.symptom_id,
-            symptom: log.symptom,
-            severity: log.severity
-        }
-    }
+    treeizeLog(header, generalhealth, newinfectionindicators) {
+            const log = header.concat(generalhealth, newinfectionindicators)
+            console.log("LOG:",log)
+            const logTree = new Treeize()
+            
+            const seed = log.map(logs => ({
+                'id*': logs.log_id,
+                'date': logs.date,
+                'generalhealth': logs.rating,
+                'newinfections': logs.newinfections
+                                
+            }))
+
+            logTree.grow(seed);
+            return logTree.getData();
+        
+
+        
+        
+       
+    },
     
     
 }
 
 
+    
 module.exports = LogService
