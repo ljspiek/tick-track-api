@@ -1,7 +1,9 @@
 const express = require('express')
+const logger = require('../logger')
 const LogService = require('./log-service')
 const LogNestedService = require('./lognested-service')
 const { requireAuth } = require('../middleware/jwt-auth')
+const path = require('path')
 const bodyParser = express.json()
 
 const logRouter = express.Router()
@@ -21,6 +23,45 @@ logRouter
     })
     .post(bodyParser, (req, res, next) => {
         
+      const { date_created, general_health_id, user_id, newinfectionindicators, symptoms, } = req.body;
+      const newLog = { date_created, general_health_id, user_id }
+      const newInf = newinfectionindicators
+      const newSymp = symptoms
+      
+      LogService.insertLog(
+        req.app.get('db'),
+        newLog
+        )
+        .then((log) => {
+          console.log("LOGID", log.id)
+          id = log.id
+          return id
+        })
+    
+        .then(function(id) {
+          Promise.all([
+            
+            LogService.insertInfections(
+              req.app.get('db'),
+              newInf, id 
+              ),
+              LogService.insertSymptoms(
+                req.app.get('db'),
+                newSymp, id 
+                )
+              ])
+              console.log("Second CONSOLE", id)
+        })
+        .then((id) => {
+          res
+          .status(201)
+          .location(path.posix.join(req.originalUrl + `/${id}`))
+          .json({
+            id: id,
+          })
+        })
+        .catch(next)
+        
     })
 
 logRouter
@@ -28,6 +69,17 @@ logRouter
     .all(checkLogExists)
     .get((req, res) => {
         res.json(res.log)
+    })
+    .delete((req, res, next) => {
+      LogService.deleteLog(
+        req.app.get('db'),
+        req.params.log_id
+      )
+        .then(numRowsAffected => {
+          logger.info(`Log with id ${id} deleted`)
+          res.status(204).end()
+        })
+        .catch(next)
     })
 
 logRouter

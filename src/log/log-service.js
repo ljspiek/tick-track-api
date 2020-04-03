@@ -158,13 +158,59 @@ const LogService = {
 
             logTree.grow(seed);
             return logTree.getData();
-        
-
-        
-        
-       
     },
     
+    insertLog(db, newLog) {
+        return db
+            .insert(newLog)
+            .into('ticktrack_logs')
+            .returning('*')
+            .then(rows => {
+                return rows[0]
+            })
+    },
+
+    insertInfections(db, newInf, id) {
+        console.log(newInf, id)
+        const symptomlog_id = id
+        const infToInsert = newInf.map(inf => 
+            ({symptomlog_id, newinfectionindicators_id: inf.newinfectionindicators_id}))
+        return db
+            .insert(infToInsert)
+            .into('ticktrack_infectionindicatorslog')
+            .returning('*')
+            .then(rows => {
+                return rows[0]
+            })
+    },
+
+    insertSymptoms(db, newSymp, id) {
+        const symptomlog_id = id
+        const sympToInsert = newSymp.map(symp => 
+            ({
+                symptomlog_id, symptoms_id: symp.symptoms_id, severity_id: symp.severity_id
+            }))
+        console.log(sympToInsert)
+        return db
+            .insert(sympToInsert)
+            .into('ticktrack_symptomsdetail')
+            .returning('*')
+            .then(rows => {
+                return rows[0]
+            })
+    },
+
+    deleteLog(db, id) {
+        return db('ticktrack_logs')
+            .where(id)
+            .delete()
+    },
+
+    updateLog(db, id, newLogEntries) {
+        return db('ticktrack_logs')
+            .where({ id })
+            .update(newLogEntries)
+    }
     
 }
 

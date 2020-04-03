@@ -9,7 +9,7 @@ const authRouter = require('./auth/auth-router')
 const usersRouter = require('./users/users-router')
 const logRouter = require('./log/log-router')
 const fieldRouter = require('./fields/field-router')
-const lognestedRouter = require('./log/lognested-router')
+const bodyParser = require('body-parser')
 const winston = require('winston')
 
 const app = express()
@@ -32,6 +32,7 @@ if (NODE_ENV !== 'production') {
   }));
 }
 
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(morgan(morganOption))
 app.use(helmet())
 // app.use(
