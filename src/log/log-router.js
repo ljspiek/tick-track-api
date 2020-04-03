@@ -70,13 +70,14 @@ logRouter
     .get((req, res) => {
         res.json(res.log)
     })
+
     .delete((req, res, next) => {
       LogService.deleteLog(
         req.app.get('db'),
         req.params.log_id
       )
         .then(numRowsAffected => {
-          logger.info(`Log with id ${id} deleted`)
+          // logger.info(`Log with id ${log_id} deleted`)
           res.status(204).end()
         })
         .catch(next)

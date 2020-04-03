@@ -187,9 +187,7 @@ const LogService = {
     insertSymptoms(db, newSymp, id) {
         const symptomlog_id = id
         const sympToInsert = newSymp.map(symp => 
-            ({
-                symptomlog_id, symptoms_id: symp.symptoms_id, severity_id: symp.severity_id
-            }))
+            ({symptomlog_id, symptoms_id: symp.symptoms_id, severity_id: symp.severity_id}))
         console.log(sympToInsert)
         return db
             .insert(sympToInsert)
@@ -201,8 +199,9 @@ const LogService = {
     },
 
     deleteLog(db, id) {
+        console.log("LOGSERVICE ID:", id)
         return db('ticktrack_logs')
-            .where(id)
+            .where({id})
             .delete()
     },
 
