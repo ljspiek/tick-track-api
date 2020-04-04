@@ -7,7 +7,12 @@ const LogService = {
             .from('ticktrack_logs as logs')
             .select(
                 'logs.id as log_id',
-                'logs.date_created as date'
+                // 'logs.date_created as date'
+            )
+            .select(
+                db.raw(
+                    "to_char(logs.date_created, 'YYYY-MM-DD') as date"
+                )
             )
             .leftJoin(
                 'ticktrack_users as users',
