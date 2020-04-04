@@ -50,7 +50,7 @@ logRouter
                 newSymp, id 
                 )
               ])
-              console.log("Second CONSOLE", id)
+              
         })
         .then((id) => {
           res
@@ -79,6 +79,52 @@ logRouter
         .then(numRowsAffected => {
           // logger.info(`Log with id ${log_id} deleted`)
           res.status(204).end()
+        })
+        .catch(next)
+    })
+
+    .patch(bodyParser, (req, res, next) => {
+        const { date_created, general_health_id, user_id, newinfectionindicators, symptoms } = req.body;
+        const updateField = { date_created, general_health_id, user_id, newinfectionindicators, symptoms }
+        const newLog = { date_created, general_health_id, user_id }
+        const newInf = newinfectionindicators
+        const newSymp = symptoms
+
+        const numberOfValues = Object.values(updateField).filter(Boolean).length
+        if(numberOfValues === 0) 
+          return res.status(400).json({
+            error: {
+              message: `Request body must contain either 'date_created', 'general_health_id', 'newinfectionindicators', or 'symptoms'`
+            }
+          })
+        LogService.updateLog(
+          req.app.get('db'),
+          req.params.log_id,
+          newLog
+        )
+        .then((log) => {
+          id = log
+          return id
+
+        })
+        .then(function(id) {
+          console.log(id)
+          Promise.all([
+            LogService.updateInfections(
+              req.app.get('db'),
+              id,
+              newInf
+            ),
+            LogService.updateSymptoms(
+              req.app.get('db'),
+              id,
+              newSymp
+            )
+          ])
+        })
+        .then((log) => {
+          res
+          .status(204).end()
         })
         .catch(next)
     })

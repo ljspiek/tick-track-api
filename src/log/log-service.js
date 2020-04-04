@@ -171,7 +171,6 @@ const LogService = {
     },
 
     insertInfections(db, newInf, id) {
-        console.log(newInf, id)
         const symptomlog_id = id
         const infToInsert = newInf.map(inf => 
             ({symptomlog_id, newinfectionindicators_id: inf.newinfectionindicators_id}))
@@ -188,7 +187,6 @@ const LogService = {
         const symptomlog_id = id
         const sympToInsert = newSymp.map(symp => 
             ({symptomlog_id, symptoms_id: symp.symptoms_id, severity_id: symp.severity_id}))
-        console.log(sympToInsert)
         return db
             .insert(sympToInsert)
             .into('ticktrack_symptomsdetail')
@@ -209,6 +207,31 @@ const LogService = {
         return db('ticktrack_logs')
             .where({ id })
             .update(newLogEntries)
+    },
+
+    updateInfections(db, id, newInf) {
+        const symptomlog_id = id
+        console.log("NEWINF-serv:", newInf)
+        if(newInf.length !== 0) {
+            const infToInsert = newInf.map(inf => 
+                ({symptomlog_id, newinfectionindicators_id: inf.newinfectionindicators_id}))
+            return db('ticktrack_infectionindicatorslog')
+                .where({ id })
+                .update(infToInsert)
+        } else {
+            return db('ticktrack_infectionindicatorslog')
+                .where({id})
+                .delete()
+        }
+    },
+
+    updateSymptoms(db, id, newSymp) {
+        const symptomlog_id = id
+        const sympToInsert = newSymp.map(symp => 
+            ({symptomlog_id, symptoms_id: symp.symptoms_id, severity_id: symp.severity_id}))
+        return db('ticktrack_symptomsdetail')
+            .where({id})
+            .update(sympToInsert)
     }
     
 }
