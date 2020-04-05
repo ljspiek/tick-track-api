@@ -78,7 +78,9 @@ logRouter
       )
         .then(numRowsAffected => {
           // logger.info(`Log with id ${log_id} deleted`)
-          res.status(204).end()
+          res
+          .status(204)
+          .end()
         })
         .catch(next)
     })
