@@ -26,7 +26,7 @@ const LogService = {
             .from('ticktrack_logs as logs')
             .select(
                 'logs.id as log_id',
-                'symptoms.id as symptom_id',
+                'symptoms.id as symptoms_id',
                 'symptoms.symptom',
                 'sympdt.severity_id',
                 'severity.severity'
