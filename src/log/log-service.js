@@ -81,6 +81,7 @@ const LogService = {
             .from('ticktrack_infectionindicatorslog as infectionlog')
             .select(
                 'logs.id as log_id',
+                'infectionlog.id',
                 'newinfections.id as infection_id',
                 'newinfections.indicator'
             )
@@ -204,7 +205,7 @@ const LogService = {
     },
 
     deleteLog(db, id) {
-        console.log("LOGSERVICE ID:", id)
+        
         return db('ticktrack_logs')
             .where({id})
             .delete()
@@ -216,41 +217,38 @@ const LogService = {
             .update(newLogEntries)
     },
 
-    updateInfections(db, id, newInf) {
-        const symptomlog_id = id
-        console.log("NEWINF-serv:", newInf)
-        if(newInf.length !== 0) {
-            const infToInsert = newInf.map(inf => 
-                ({symptomlog_id, newinfectionindicators_id: inf.newinfectionindicators_id}))
-            return db('ticktrack_infectionindicatorslog')
-                .where({ id })
-                .update(infToInsert)
-        } else {
-            return db('ticktrack_infectionindicatorslog')
-                .where({id})
-                .delete()
-        }
+    updateInfections(db, delInf) {
+        console.log("DELS", delInf)
+        return db.transaction(trx => {
+            const dels = []
+            delInf.forEach(inf => {
+                const rem = db('ticktrack_infectionindicatorslog')
+                    .where('id', inf.id)
+                    .delete()
+                    .transacting(trx);
+                dels.push(rem)
+            });
+            Promise.all(dels)
+                .then(trx.commit)
+                .catch(trx.rollback);
+        })
+        
     },
 
-    updateSymptoms(db, logid, newSymp) {
+    updateSymptoms(db, logid, chgSymp) {
         const symptomlog_id = logid
-        console.log("SYMPTOMLOG", symptomlog_id)
-        const sympToInsert = newSymp.map(symp => 
+        
+        const sympToChg = chgSymp.map(symp => 
             ({
                 id: symp.id,
                 symptomlog_id, 
                 symptoms_id: symp.symptoms_id, 
                 severity_id: symp.severity_id}))
-        console.log("SYMPTOMS TO IMPORT:", sympToInsert)
-        // sympToInsert.forEach(symp => {
-        //     console.log(symp)
-        // return db('ticktrack_symptomsdetail')
-        //     .where({"id": symp.id})
-        //     .update({"severity_id": symp.severity_id})
-        // })
+        
+       
         return db.transaction(trx => {
             const queries = []
-            sympToInsert.forEach(symp => {
+            sympToChg.forEach(symp => {
                 const query = db('ticktrack_symptomsdetail')
                     .where('id', symp.id)
                     .update({
@@ -264,6 +262,24 @@ const LogService = {
                 .then(trx.commit)
                 .catch(trx.rollback);
         });
+    },
+
+    addSymptoms(db, logid, newSymp) {
+        const symptomlog_id = logid
+
+        const sympToAdd = newSymp.map(symp => ({
+            symptomlog_id,
+            symptoms_id: symp.symptoms_id,
+            severity_id: symp.severity_id
+        }))
+        console.log("SYMPTOMS ADDING:", sympToAdd)
+        return db
+            .insert(sympToAdd)
+            .into('ticktrack_symptomsdetail')
+            .returning('*')
+            .then(rows => {
+                return rows[0]
+            })
     }
     
 }

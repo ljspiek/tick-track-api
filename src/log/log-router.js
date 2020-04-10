@@ -44,11 +44,11 @@ logRouter
               req.app.get('db'),
               newInf, id 
               ),
-              LogService.insertSymptoms(
-                req.app.get('db'),
-                newSymp, id 
-                )
-              ])
+            LogService.insertSymptoms(
+              req.app.get('db'),
+              newSymp, id 
+              )
+          ])
               
         })
         .then((id) => {
@@ -85,11 +85,14 @@ logRouter
     })
 
     .patch(bodyParser, (req, res, next) => {
-        const { date_created, general_health_id, user_id, newinfectionindicators, symptoms } = req.body;
-        const updateField = { date_created, general_health_id, user_id, newinfectionindicators, symptoms }
+        const { date_created, general_health_id, user_id, newinfectionindicators, symptomsnew, symptomschg, deletedinfs } = req.body;
+        const updateField = { date_created, general_health_id, user_id, newinfectionindicators, symptomsnew, symptomschg, deletedinfs }
         const newLog = { date_created, general_health_id, user_id }
+        const delInf = deletedinfs
         const newInf = newinfectionindicators
-        const newSymp = symptoms
+        const newSymp = symptomsnew
+        const chgSymp = symptomschg
+        console.log("CHGSYMP:", chgSymp)
 
         const numberOfValues = Object.values(updateField).filter(Boolean).length
         if(numberOfValues === 0) 
@@ -105,15 +108,22 @@ logRouter
               req.app.get('db'),
               req.params.log_id,
               newLog,
-             
-            
             ),
-            // LogService.updateInfections(
-            //   req.app.get('db'),
-            //   req.params.log_id,
-            //   newInf
-            // ),
+            LogService.insertInfections(
+              req.app.get('db'),
+              newInf,
+              req.params.log_id
+            ),
+            LogService.updateInfections(
+              req.app.get('db'),
+              delInf
+            ),
             LogService.updateSymptoms(
+              req.app.get('db'),
+              req.params.log_id,
+              chgSymp
+            ),
+            LogService.addSymptoms(
               req.app.get('db'),
               req.params.log_id,
               newSymp
