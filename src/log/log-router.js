@@ -33,7 +33,6 @@ logRouter
         newLog
         )
         .then((log) => {
-          console.log("LOGID", log.id)
           id = log.id
           return id
         })
@@ -99,37 +98,34 @@ logRouter
               message: `Request body must contain either 'date_created', 'general_health_id', 'newinfectionindicators', or 'symptoms'`
             }
           })
-        LogService.updateLog(
-          req.app.get('db'),
-          req.params.log_id,
-          newLog
-        )
-        .then((log) => {
-          id = log
-          return id
-
-        })
-        .then(function(id) {
-          console.log(id)
+          
+          
           Promise.all([
-            LogService.updateInfections(
+            LogService.updateLog(
               req.app.get('db'),
-              id,
-              newInf
+              req.params.log_id,
+              newLog,
+             
+            
             ),
+            // LogService.updateInfections(
+            //   req.app.get('db'),
+            //   req.params.log_id,
+            //   newInf
+            // ),
             LogService.updateSymptoms(
               req.app.get('db'),
-              id,
+              req.params.log_id,
               newSymp
             )
           ])
+          .then(() => {
+            res
+            .status(204).end()
+          })
+          .catch(next)
         })
-        .then((log) => {
-          res
-          .status(204).end()
-        })
-        .catch(next)
-    })
+    
 
 logRouter
     .route('/user/:user_id')

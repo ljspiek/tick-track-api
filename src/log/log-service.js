@@ -7,7 +7,7 @@ const LogService = {
             .from('ticktrack_logs as logs')
             .select(
                 'logs.id as log_id',
-                // 'logs.date_created as date'
+                'logs.date_created as date'
             )
             .select(
                 db.raw(
@@ -26,6 +26,7 @@ const LogService = {
             .from('ticktrack_logs as logs')
             .select(
                 'logs.id as log_id',
+                'sympdt.id',
                 'symptoms.id as symptoms_id',
                 'symptoms.symptom',
                 'sympdt.severity_id',
@@ -231,13 +232,22 @@ const LogService = {
         }
     },
 
-    updateSymptoms(db, id, newSymp) {
-        const symptomlog_id = id
+    updateSymptoms(db, logid, newSymp) {
+        const symptomlog_id = logid
+        console.log("SYMPTOMLOG", symptomlog_id)
         const sympToInsert = newSymp.map(symp => 
-            ({symptomlog_id, symptoms_id: symp.symptoms_id, severity_id: symp.severity_id}))
+            ({
+                id: symp.id,
+                symptomlog_id, 
+                symptoms_id: symp.symptoms_id, 
+                severity_id: symp.severity_id}))
+        console.log("SYMPTOMS TO IMPORT:", sympToInsert)
+        sympToInsert.forEach(symp => {
+            console.log(symp)
         return db('ticktrack_symptomsdetail')
-            .where({id})
-            .update(sympToInsert)
+            .where({"id": symp.id})
+            .update({"severity_id": symp.severity_id})
+        })
     }
     
 }
