@@ -242,12 +242,28 @@ const LogService = {
                 symptoms_id: symp.symptoms_id, 
                 severity_id: symp.severity_id}))
         console.log("SYMPTOMS TO IMPORT:", sympToInsert)
-        sympToInsert.forEach(symp => {
-            console.log(symp)
-        return db('ticktrack_symptomsdetail')
-            .where({"id": symp.id})
-            .update({"severity_id": symp.severity_id})
-        })
+        // sympToInsert.forEach(symp => {
+        //     console.log(symp)
+        // return db('ticktrack_symptomsdetail')
+        //     .where({"id": symp.id})
+        //     .update({"severity_id": symp.severity_id})
+        // })
+        return db.transaction(trx => {
+            const queries = []
+            sympToInsert.forEach(symp => {
+                const query = db('ticktrack_symptomsdetail')
+                    .where('id', symp.id)
+                    .update({
+                        severity_id: symp.severity_id
+                    })
+                    .transacting(trx);
+                queries.push(query);
+            });
+
+            Promise.all(queries)
+                .then(trx.commit)
+                .catch(trx.rollback);
+        });
     }
     
 }
