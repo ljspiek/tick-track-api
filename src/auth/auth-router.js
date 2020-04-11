@@ -18,26 +18,26 @@ AuthService.getUserWithEmail(
 req.app.get('db'),
 loginUser.email
 )
-.then(dbUser => {
-  if (!dbUser)
-    return res.status(400).json({
-      error: 'Incorrect email or password',
-    })
-          return AuthService.comparePasswords(loginUser.password, dbUser.password)
-            .then(compareMatch => {
-              if (!compareMatch)
-                return res.status(400).json({
-                  error: 'Incorrect email or password',
-                })
-                  
-        const sub = dbUser.email
+  .then(dbUser => {
+    if (!dbUser)
+      return res.status(400).json({
+        error: 'Incorrect email or password',
+      })
+      return AuthService.comparePasswords(loginUser.password, dbUser.password)
+  .then(compareMatch => {
+    if (!compareMatch)
+      return res.status(400).json({
+        error: 'Incorrect email or password',
+      })
+              
+      const sub = dbUser.email
       const payload = { user_id: dbUser.id }
       res.send({
         authToken: AuthService.createJwt(sub, payload),
       })
-                          })
-              })
-              .catch(next)
-        })
+    })
+    })
+    .catch(next)
+  })
 
 module.exports = authRouter
