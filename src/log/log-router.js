@@ -1,7 +1,6 @@
 const express = require('express')
 const logger = require('../logger')
 const LogService = require('./log-service')
-const LogNestedService = require('./lognested-service')
 const { requireAuth } = require('../middleware/jwt-auth')
 const path = require('path')
 const bodyParser = express.json()

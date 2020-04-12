@@ -9,13 +9,14 @@
     "start": "node src/server.js",
     "predeploy": "npm audit",
     "deploy": "git push heroku master",
-    "migrate": "postgrator --config postgrator-config.js"
+    "migrate": "postgrator --config postgrator-config.js",
+    "migrate:test": "env NODE_ENV=test npm run migrate"
   },
   "keywords": [],
   "engines": {
     "node": "12.13.1"
   },
-  "author": "",
+  "author": "Laura Spieker <ljspiek@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
