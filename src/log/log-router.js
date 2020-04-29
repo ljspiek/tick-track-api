@@ -9,6 +9,7 @@ const logRouter = express.Router()
 
 logRouter
     .route('/')
+    .all(requireAuth)
     .get((req, res, next) => {
         Promise.all([
             LogService.getLogHeader(req.app.get('db')),
@@ -64,6 +65,7 @@ logRouter
 
 logRouter
     .route('/:log_id')
+    .all(requireAuth)
     .all(checkLogExists)
     .get((req, res) => {
         res.json(res.log)
@@ -91,7 +93,7 @@ logRouter
         const newInf = newinfectionindicators
         const newSymp = symptomsnew
         const chgSymp = symptomschg
-        console.log("CHGSYMP:", chgSymp)
+        
 
         const numberOfValues = Object.values(updateField).filter(Boolean).length
         if(numberOfValues === 0) 
@@ -138,6 +140,7 @@ logRouter
 
 logRouter
     .route('/user/:user_id')
+    .all(requireAuth)
     .all(checkUserLogExists)
     .get((req, res) => {
         res.json(res.log)

@@ -218,7 +218,7 @@ const LogService = {
     },
 
     updateInfections(db, delInf) {
-        console.log("DELS", delInf)
+        
         return db.transaction(trx => {
             const dels = []
             delInf.forEach(inf => {
@@ -272,7 +272,7 @@ const LogService = {
             symptoms_id: symp.symptoms_id,
             severity_id: symp.severity_id
         }))
-        console.log("SYMPTOMS ADDING:", sympToAdd)
+        
         return db
             .insert(sympToAdd)
             .into('ticktrack_symptomsdetail')

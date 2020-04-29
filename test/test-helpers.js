@@ -27,31 +27,37 @@ function makeUsersArray() {
 function makeLogArray() {
     return[
         {
+            id: 1,
             user_id: 1,
             date_created: new Date('2029-01-22T16:28:32.615Z'),
             general_health_id: 3
         },
         {
+            id: 2,
             user_id: 1,
             date_created:new Date('2029-01-22T16:28:32.615Z'),
             general_health_id: 2
         },
         {
+            id: 3,
             user_id: 2,
             date_created: new Date('2029-01-22T16:28:32.615Z'),
             general_health_id: 4
         },
         {
+            id: 4,
             user_id: 2,
             date_created:new Date('2029-01-22T16:28:32.615Z'),
             general_health_id: 3
         },
         {
+            id: 5,
             user_id: 3,
             date_created: new Date('2029-01-22T16:28:32.615Z'),
             general_health_id: 5
         },
         {
+            id: 6,
             user_id: 3,
             date_created:new Date('2029-01-22T16:28:32.615Z'),
             general_health_id: 5
@@ -62,14 +68,17 @@ function makeLogArray() {
 function makeInfIndLogArray() {
     return[
         {
+            id: 1, 
             symptomlog_id: 1,
             newinfectionindicators_id: 1
         },
         {
+            id: 2, 
             symptomlog_id: 1,
             newinfectionindicators_id: 2
         },
         {
+            id: 3, 
             symptomlog_id: 3,
             newinfectionindicators_id: 3
         }
@@ -97,7 +106,7 @@ function makeSympsDtArray() {
             symptomlog_id: 2,
             symptoms_id: 2,
             severity_id: 3
-        }
+        },
         {
             symptomlog_id: 2,
             symptoms_id: 5,
@@ -127,7 +136,7 @@ function makeSympsDtArray() {
             symptomlog_id: 5,
             symptoms_id: 2,
             severity_id: 3
-        }
+        },
         {
             symptomlog_id: 6,
             symptoms_id: 5,
@@ -163,11 +172,11 @@ function cleanTables(db) {
             Promise.all([
                 trx.raw(`ALTER SEQUENCE ticktrack_users_id_seq minvalue 0 START WITH 1`),
                 trx.raw(`ALTER SEQUENCE ticktrack_logs_id_seq minvalue 0 START WITH 1`),
-                trx.raw(`ALTER SEQUENCE ticktrack_infectionindicators_id_seq minvalue 0 START WITH 1`),
+                trx.raw(`ALTER SEQUENCE ticktrack_infectionindicatorslog_id_seq minvalue 0 START WITH 1`),
                 trx.raw(`ALTER SEQUENCE ticktrack_symptomsdetail_id_seq minvalue 0 START WITH 1`),
                 trx.raw(`SELECT setval('ticktrack_users_id_seq', 0)`),
                 trx.raw(`SELECT setval('ticktrack_logs_id_seq', 0)`),
-                trx.raw(`SELECT setval('ticktrack_infectionindicators_id_seq', 0)`),
+                trx.raw(`SELECT setval('ticktrack_infectionindicatorslog_id_seq', 0)`),
                 trx.raw(`SELECT setval('ticktrack_symptomsdetail_id_seq', 0)`),
             ])
         )
@@ -175,6 +184,7 @@ function cleanTables(db) {
 }
 
 function seedUsers(db, users) {
+
     const preppedUsers = users.map(user => ({
         ...user,
         password: bcrypt.hashSync(user.password, 1)
@@ -188,18 +198,41 @@ function seedUsers(db, users) {
         )
 }
 
+function seedLogTables(db, users, logs, infections, symptoms) {
+    return db.transaction(async trx => {
+        await seedUsers(trx, users)
+        await trx.into('ticktrack_logs').insert(logs)
+        await trx.raw(
+            `SELECT setval('ticktrack_logs_id_seq', ?)`,
+            [logs[logs.length -1].id]
+        )
+        await trx.into('ticktrack_infectionindicatorslog').insert(infections)
+        await trx.into('ticktrack_symptomsdetail').insert(symptoms)
+        // if(logs.length) {
+        //     await trx.into('ticktrack_logs').insert(logs)
+        //     await trx.raw(
+        //         `SELECT setval('ticktrack_logs_id_seq', ?)`,
+        //         [logs[logs.length -1].id]
+        //     )
+        // }
+    })
+}
+
 function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
     const token = jwt.sign({ user_id: user.id }, secret, {
-      subject: user.user_name,
+      subject: user.email,
       algorithm: 'HS256',
     })
     return `Bearer ${token}`
   }
 
 
+
 module.exports = {
     makeUsersArray,
     cleanTables,
     makeAuthHeader,
-    makeLogFixtures
+    makeLogFixtures,
+    seedLogTables,
+    seedUsers
 }
