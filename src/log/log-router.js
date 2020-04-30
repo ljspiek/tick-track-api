@@ -11,10 +11,11 @@ logRouter
     .route('/')
     .all(requireAuth)
     .get((req, res, next) => {
+        const id = req.user.id
         Promise.all([
-            LogService.getLogHeader(req.app.get('db')),
-            LogService.getAllLoggedHealthRatings(req.app.get('db')),
-            LogService.getCountNewInfections(req.app.get('db'))
+            LogService.getHeaderDataByUser(req.app.get('db'), id),
+            LogService.getHealthLogByUser(req.app.get('db'), id),
+            LogService.getInfectionLogByUser(req.app.get('db'), id)
         ])
         .then(([header, generalhealth, newinfectionindicators]) => {
             res.json(LogService.treeizeLog(header, generalhealth, newinfectionindicators))
@@ -23,11 +24,13 @@ logRouter
     })
     .post(bodyParser, (req, res, next) => {
         
-      const { date_created, general_health_id, user_id, newinfectionindicators, symptoms, } = req.body;
-      const newLog = { date_created, general_health_id, user_id }
+      const { date_created, general_health_id, newinfectionindicators, symptoms, } = req.body;
+      const newLog = { date_created, general_health_id }
       const newInf = newinfectionindicators
       const newSymp = symptoms
       
+      newLog.user_id = req.user.id
+
       LogService.insertLog(
         req.app.get('db'),
         newLog
@@ -77,7 +80,7 @@ logRouter
         req.params.log_id
       )
         .then(numRowsAffected => {
-          // logger.info(`Log with id ${log_id} deleted`)
+          
           res
           .status(204)
           .end()

@@ -136,6 +136,11 @@ const LogService = {
             .where('logs.id', id)
     },
 
+    getHeaderDataByUser(db, id) {
+        return LogService.getLogHeader(db)
+            .where('users.id', id)
+    },
+
     getSymptpomLogByUser(db, id) {
         return LogService.getAllLoggedSymptoms(db)
             .where('users.id', id)
