@@ -22,14 +22,14 @@
 
 <h2>Technology Used</h2>
 
-<ul>This server uses the following technology:
+This server uses the following technology:
     <li>Node.js</li>
     <li>Express.js</li>
     <li>PostgreSQL</li>
     <li>Knex.js</li>
     <li>JSON Web Token(JWT)</li>
     <li>Treeize</li>
-</ul>
+
 
 <h2>Screenshots</h2>
 ***************************
