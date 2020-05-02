@@ -32,7 +32,7 @@ This server uses the following technology:
 
 
 <h2>Screenshots</h2>
-***************************
+
 <img src = home.png>
 <img src = log.png>
 <img src = history.png>
