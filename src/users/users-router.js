@@ -6,9 +6,10 @@ const usersRouter = express.Router()
 const jsonBodyParser = express.json()
 
 usersRouter
+    //creates new user
   .post('/', jsonBodyParser, (req, res, next) => {
     const { password, email } = req.body
-
+    //first confirms required information is present
     for (const field of ['email', 'password'])
         if (!req.body[field])
             return res.status(400).json({
@@ -19,7 +20,7 @@ usersRouter
     
         if (passwordError)
             return res.status(400).json({ error: passwordError })
-
+//compares to existing user with same email address
         UsersService.hasUserWithEmail(
             req.app.get('db'),
             email

@@ -6,6 +6,7 @@ const fieldRouter = express.Router()
 
 fieldRouter
     .route('/')
+    //loads all fields for form
     .get((req, res, next) => {
         Promise.all([
             FieldService.getGeneralHealth(req.app.get('db')),

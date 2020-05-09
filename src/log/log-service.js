@@ -101,7 +101,7 @@ const LogService = {
                 'logs.user_id'
             )
     },
-
+    //used to display if user has selected a new infection indicator in summary view
     getCountNewInfections(db) {
         return db 
             .from('ticktrack_infectionindicatorslog as infectionlog')
@@ -157,8 +157,39 @@ const LogService = {
             .where('users.id', id)
     },
 
+    //get number of infections for summary view
+    getCountInfectionLogByUser(db, id) {
+        return LogService.getCountNewInfections(db)
+        .leftJoin(
+            'ticktrack_logs as logs',
+            'logs.id',
+            'infectionlog.symptomlog_id'
+        )
+        .leftOuterJoin(
+            'ticktrack_newinfections as newinfections',
+            'newinfections.id',
+            'infectionlog.newinfectionindicators_id'
+        )
+        .leftJoin(
+            'ticktrack_users as users',
+            'users.id', 
+            'logs.user_id'
+        )
+        .select('infectionlog.symptomlog_id as log_id',
+            db.raw(
+                `count(DISTINCT infectionlog.newinfectionindicators_id) AS newinfections`
+                )
+            )
+            .groupBy('log_id')
+        .where('users.id', id)
+
+    },
+
+
+    //convert flat array to nested array with objects to allow easy app retrieval and display of information
     treeizeLog(header, generalhealth, newinfectionindicators) {
             const log = header.concat(generalhealth, newinfectionindicators)
+           
             const logTree = new Treeize()
             
             const seed = log.map(logs => ({
@@ -184,6 +215,7 @@ const LogService = {
     },
 
     insertInfections(db, newInf, id) {
+        //using id created by insertLog, update infections
         const symptomlog_id = id
         const infToInsert = newInf.map(inf => 
             ({symptomlog_id, newinfectionindicators_id: inf.newinfectionindicators_id}))
@@ -197,6 +229,7 @@ const LogService = {
     },
 
     insertSymptoms(db, newSymp, id) {
+        //using id created by insertLog, update symptoms
         const symptomlog_id = id
         const sympToInsert = newSymp.map(symp => 
             ({symptomlog_id, symptoms_id: symp.symptoms_id, severity_id: symp.severity_id}))
@@ -223,7 +256,7 @@ const LogService = {
     },
 
     updateInfections(db, delInf) {
-        
+        //use transaction to update multiple rows
         return db.transaction(trx => {
             const dels = []
             delInf.forEach(inf => {
@@ -250,7 +283,7 @@ const LogService = {
                 symptoms_id: symp.symptoms_id, 
                 severity_id: symp.severity_id}))
         
-       
+        //use transaction to update multiple rows
         return db.transaction(trx => {
             const queries = []
             sympToChg.forEach(symp => {

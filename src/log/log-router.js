@@ -8,6 +8,7 @@ const bodyParser = express.json()
 const logRouter = express.Router()
 
 logRouter
+    //gets all logs for authenticated user
     .route('/')
     .all(requireAuth)
     .get((req, res, next) => {
@@ -15,13 +16,15 @@ logRouter
         Promise.all([
             LogService.getHeaderDataByUser(req.app.get('db'), id),
             LogService.getHealthLogByUser(req.app.get('db'), id),
-            LogService.getInfectionLogByUser(req.app.get('db'), id)
+            LogService.getCountInfectionLogByUser(req.app.get('db'), id)
         ])
         .then(([header, generalhealth, newinfectionindicators]) => {
+            
             res.json(LogService.treeizeLog(header, generalhealth, newinfectionindicators))
         })
         .catch(next)
     })
+    //post a new log by the authenticated user logged in
     .post(bodyParser, (req, res, next) => {
         
       const { date_created, general_health_id, newinfectionindicators, symptoms, } = req.body;
@@ -30,7 +33,7 @@ logRouter
       const newSymp = symptoms
       
       newLog.user_id = req.user.id
-
+      //first create log and obtain id for subsequent Promises to insert infections and symptoms
       LogService.insertLog(
         req.app.get('db'),
         newLog
@@ -39,7 +42,7 @@ logRouter
           id = log.id
           return id
         })
-    
+        //using id created, update infections and symptoms
         .then(function(id) {
           Promise.all([
             
@@ -70,10 +73,11 @@ logRouter
     .route('/:log_id')
     .all(requireAuth)
     .all(checkLogExists)
+    //get exact log by log id
     .get((req, res) => {
         res.json(res.log)
     })
-
+    //delete log by log id
     .delete((req, res, next) => {
       LogService.deleteLog(
         req.app.get('db'),
@@ -87,7 +91,9 @@ logRouter
         })
         .catch(next)
     })
-
+    //update existing log - several calls happening to allow new symptoms (newSymp) or infection indicators (new Inf) to be added
+    //this route also allows user to delete infection indicators (delInf) if entered in error
+    //traditional patch/update occurring for all others (date_created, general_health_id, chgSymp)
     .patch(bodyParser, (req, res, next) => {
         const { date_created, general_health_id, user_id, newinfectionindicators, symptomsnew, symptomschg, deletedinfs } = req.body;
         const updateField = { date_created, general_health_id, user_id, newinfectionindicators, symptomsnew, symptomschg, deletedinfs }
@@ -142,6 +148,7 @@ logRouter
     
 
 logRouter
+    //obtain users
     .route('/user/:user_id')
     .all(requireAuth)
     .all(checkUserLogExists)
@@ -150,6 +157,7 @@ logRouter
     })
 
 
+    //asynchronous functions to check if a Log Exists before completing a PATCH, DELETE, or GET by id
 async function checkLogExists(req, res, next) {
   try {
     const symptoms = await LogService.getSymptpomLogById(
@@ -189,6 +197,7 @@ async function checkLogExists(req, res, next) {
   }
 }
 
+//asynchronous functions to check if a USER Exists before completing a PATCH, DELETE, or GET by id
 async function checkUserLogExists(req, res, next) {
     try {
       const symptoms = await LogService.getSymptpomLogByUser(

@@ -208,13 +208,7 @@ function seedLogTables(db, users, logs, infections, symptoms) {
         )
         await trx.into('ticktrack_infectionindicatorslog').insert(infections)
         await trx.into('ticktrack_symptomsdetail').insert(symptoms)
-        // if(logs.length) {
-        //     await trx.into('ticktrack_logs').insert(logs)
-        //     await trx.raw(
-        //         `SELECT setval('ticktrack_logs_id_seq', ?)`,
-        //         [logs[logs.length -1].id]
-        //     )
-        // }
+       
     })
 }
 
