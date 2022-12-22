@@ -28,7 +28,7 @@
     "express": "^4.17.1",
     "helmet": "^3.21.2",
     "join-js": "^1.0.2",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "knex": "^0.20.13",
     "minimist": "^1.2.5",
     "morgan": "^1.9.1",
